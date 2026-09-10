@@ -1,7 +1,8 @@
-/* ===== HAPPY BIRTHDAY SURPRISE — script ===== */
+/* ===== JANAM DIN MUBARAK — script (Taaj + music box fallback) ===== */
 'use strict';
 const $ = s => document.querySelector(s);
 const $$ = s => document.querySelectorAll(s);
+const rand = (a,b)=>a+Math.random()*(b-a);
 
 /* ---------- STARS ---------- */
 (function stars(){
@@ -18,17 +19,17 @@ const $$ = s => document.querySelectorAll(s);
 /* ---------- PARTICLE ENGINE (confetti + fireworks) ---------- */
 const FX = (function(){
   const canvas = $('#fx'), ctx = canvas.getContext('2d');
-  let W, H, pieces = [], rockets = [];
+  let pieces = [], rockets = [];
   const COLORS = ['#8b5cf6','#22d3ee','#ec4899','#fbbf24','#f472b6','#a78bfa','#ffffff','#fde68a'];
-  const rand = (a,b)=>a+Math.random()*(b-a);
   const pick = arr => arr[Math.floor(Math.random()*arr.length)];
-
-  function resize(){ W = canvas.width = innerWidth * devicePixelRatio; H = canvas.height = innerHeight * devicePixelRatio;
-    canvas.style.width = innerWidth+'px'; canvas.style.height = innerHeight+'px'; ctx.scale(devicePixelRatio,devicePixelRatio); }
   let scaled = false;
-  addEventListener('resize', ()=>{ scaled=false; resize(); scaled=true; });
+  function resize(){
+    canvas.width = innerWidth * devicePixelRatio; canvas.height = innerHeight * devicePixelRatio;
+    canvas.style.width = innerWidth+'px'; canvas.style.height = innerHeight+'px';
+    ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0); scaled = true;
+  }
+  addEventListener('resize', resize);
 
-  // confetti burst from a point
   function burst(x, y, count=90, power=11){
     for(let i=0;i<count;i++){
       const a = rand(0, Math.PI*2), v = rand(3, power);
@@ -38,16 +39,14 @@ const FX = (function(){
     }
     if(pieces.length>600) pieces.splice(0, pieces.length-600);
   }
-  // side cannons
   function cannons(count=120){
     const H0 = innerHeight*.78;
     burst(30, H0, count/2, 16);
     burst(innerWidth-30, H0, count/2, 16);
   }
-  // firework
   function firework(x){
     rockets.push({ x: x!==undefined ? x : rand(innerWidth*.15, innerWidth*.85),
-      y: innerHeight+10, vy:-rand(9,12), target:rand(innerHeight*.18, innerHeight*.45), exploded:false });
+      y: innerHeight+10, vy:-rand(9,12), target:rand(innerHeight*.18, innerHeight*.45) });
   }
   function explode(r){
     const count = 90, base = rand(0,Math.PI*2);
@@ -57,10 +56,9 @@ const FX = (function(){
         rot:0, vr:0, c:pick(COLORS), life:1, decay:rand(.008,.016), shape:'spark', glow:true });
     }
   }
-  function loop(){
-    if(!scaled){ resize(); scaled=true; }
+  (function loop(){
+    if(!scaled) resize();
     ctx.clearRect(0,0,innerWidth,innerHeight);
-    // rockets
     for(let i=rockets.length-1;i>=0;i--){
       const r = rockets[i];
       r.y += r.vy; r.vy += .12;
@@ -68,12 +66,11 @@ const FX = (function(){
       ctx.beginPath(); ctx.arc(r.x,r.y+9,1.6,0,Math.PI*2); ctx.fillStyle='rgba(255,200,120,.5)'; ctx.fill();
       if(r.y <= r.target || r.vy > -1){ explode(r); rockets.splice(i,1); }
     }
-    // pieces
     for(let i=pieces.length-1;i>=0;i--){
       const p = pieces[i];
       p.x += p.vx; p.y += p.vy; p.rot += p.vr;
-      p.vy += p.shape==='spark' ? .045 : .18;   // gravity
-      p.vx *= p.shape==='spark' ? .985 : .992;   // drag
+      p.vy += p.shape==='spark' ? .045 : .18;
+      p.vx *= p.shape==='spark' ? .985 : .992;
       p.life -= p.decay;
       if(p.life <= 0){ pieces.splice(i,1); continue; }
       ctx.save(); ctx.globalAlpha = Math.max(p.life,0); ctx.translate(p.x,p.y); ctx.rotate(p.rot);
@@ -84,12 +81,11 @@ const FX = (function(){
       ctx.restore();
     }
     requestAnimationFrame(loop);
-  }
-  loop();
+  })();
   return { burst, cannons, firework };
 })();
 
-/* ---------- AMBIENT BALLOONS ---------- */
+/* ---------- AMBIENT BALLOONS (mobile-tuned) ---------- */
 (function balloons(){
   const layer = $('#ambient');
   const PALETTE = [['#f472b6','#be185d'],['#a78bfa','#6d28d9'],['#22d3ee','#0e7490'],['#fbbf24','#b45309'],['#fb7185','#e11d48']];
@@ -105,42 +101,40 @@ const FX = (function(){
     layer.appendChild(b);
     setTimeout(()=>b.remove(), dur*1000+100);
   }
-  function rand(a,b){ return a+Math.random()*(b-a); }
   let started = false;
   window.__startAmbient = () => {
     if(started) return; started = true;
-    spawn(); spawn();
-    setInterval(spawn, 2600);
+    const isMobile = window.innerWidth < 600;
+    spawn(); if(!isMobile) spawn();
+    setInterval(spawn, isMobile ? 3200 : 2400);
   };
 })();
 
-/* ---------- MUSIC BOX (Web Audio) ---------- */
+/* ---------- MUSIC BOX (Web Audio — guaranteed fallback) ---------- */
 const MusicBox = (function(){
-  let ctx=null, master=null, delay=null, playing=false, loopTO=null;
-  const N = {G3:196,C4:261.63,F4:349.23,A4:440,B4:493.88,C5:523.25,D5:587.33,E5:659.25,F5:698.46,G5:783.99};
-  // Happy Birthday — [note, beats]
+  let ctx=null, master=null, delay=null, playing=false, loopTO=null, initialized=false;
+  const FREQ = {G4:392,A4:440,B4:493.88,C5:523.25,D5:587.33,E5:659.25,F5:698.46,G5:783.99,C3:130.81,G3:196};
   const MELODY = [
     ['G4',.5],['G4',.5],['A4',1],['G4',1],['C5',1],['B4',1.7],['r',.3],
     ['G4',.5],['G4',.5],['A4',1],['G4',1],['D5',1],['C5',1.7],['r',.3],
     ['G4',.5],['G4',.5],['G5',1],['E5',1],['C5',1],['B4',1],['A4',1.7],['r',.3],
     ['F5',.5],['F5',.5],['E5',1],['C5',1],['D5',1],['C5',2.2],['r',1.6],
   ];
-  const BASS = ['C3','C3','G3','C3']; // rough roots per phrase
-  const FREQ = {G4:392,A4:440,B4:493.88,C5:523.25,D5:587.33,E5:659.25,F5:698.46,G5:783.99,
-                C3:130.81,G3:196,F3:174.61};
-
-  function init(){
-    if(ctx) return;
-    ctx = new (window.AudioContext||window.webkitAudioContext)();
-    master = ctx.createGain(); master.gain.value = .5; master.connect(ctx.destination);
-    // shimmer delay
-    delay = ctx.createDelay(); delay.delayTime.value = .3;
-    const fb = ctx.createGain(); fb.gain.value = .32;
-    const wet = ctx.createGain(); wet.gain.value = .18;
-    delay.connect(fb); fb.connect(delay); delay.connect(wet); wet.connect(master);
+  function init(){ // MUST be called inside a user gesture (iOS unlock)
+    if(initialized) return;
+    try{
+      ctx = new (window.AudioContext||window.webkitAudioContext)();
+      master = ctx.createGain(); master.gain.value = .5; master.connect(ctx.destination);
+      delay = ctx.createDelay(); delay.delayTime.value = .3;
+      const fb = ctx.createGain(); fb.gain.value = .32;
+      const wet = ctx.createGain(); wet.gain.value = .18;
+      delay.connect(fb); fb.connect(delay); delay.connect(wet); wet.connect(master);
+      if(ctx.state === 'suspended') ctx.resume();
+      initialized = true;
+    }catch(e){}
   }
   function tone(freq, t, dur, vol=.5, isBass=false){
-    if(!freq) return;
+    if(!freq || !ctx) return;
     const o = ctx.createOscillator(), g = ctx.createGain();
     o.type = isBass ? 'sine' : 'triangle';
     o.frequency.value = freq;
@@ -149,7 +143,6 @@ const MusicBox = (function(){
     g.gain.exponentialRampToValueAtTime(.0001, t + dur);
     o.connect(g); g.connect(master); g.connect(delay);
     o.start(t); o.stop(t + dur + .05);
-    // bell overtone for melody
     if(!isBass){
       const o2 = ctx.createOscillator(), g2 = ctx.createGain();
       o2.type = 'sine'; o2.frequency.value = freq*2;
@@ -160,62 +153,124 @@ const MusicBox = (function(){
       o2.start(t); o2.stop(t+dur);
     }
   }
-  function playPhrase(startAt, beat){
-    let t = startAt;
-    MELODY.forEach(([n,b])=>{
-      if(n!=='r') tone(FREQ[n], t, Math.max(b*beat*.9,.35), .42);
-      t += b*beat;
-    });
-    return t; // end time
-  }
-  function playBass(startAt, beat){
-    // soft root notes each phrase start
-    let t = startAt; let i = 0;
-    MELODY.forEach(([n,b])=>{ 
-      if(n!=='r' && t === startAt) {}
-      t += b*beat;
-    });
-    // simple: play roots at phrase starts
-    const phraseLen = beat*3.5;
-    [0, phraseLen*2, phraseLen*4.6, phraseLen*7.2].forEach((off,i)=>{
-      const root = [FREQ.G3, FREQ.G3, FREQ.C3, FREQ.C3][i];
-      if(root) tone(root, startAt+off, beat*3, .16, true);
-    });
-  }
-  function start(){
-    init();
-    if(ctx.state === 'suspended') ctx.resume();
-    if(playing) return;
-    playing = true;
-    scheduleLoop();
-  }
   function scheduleLoop(){
-    if(!playing) return;
+    if(!playing || !ctx) return;
     const beat = .48;
     const startAt = ctx.currentTime + .08;
-    const end = playPhrase(startAt, beat);
-    playBass(startAt, beat);
-    loopTO = setTimeout(scheduleLoop, (end - ctx.currentTime + 1.2) * 1000);
+    let t = startAt;
+    MELODY.forEach(([n,b])=>{ if(n!=='r') tone(FREQ[n], t, Math.max(b*beat*.9,.35), .4); t += b*beat; });
+    [FREQ.G3, FREQ.G3, FREQ.C3, FREQ.C3].forEach((root,i)=>{
+      const phrase = [0, 3.4, 6.9, 10.3];
+      if(root && phrase[i]!==undefined) tone(root, startAt + phrase[i]*beat, beat*3, .15, true);
+    });
+    loopTO = setTimeout(scheduleLoop, (t - ctx.currentTime + 1.2) * 1000);
   }
-  function stop(){ playing = false; clearTimeout(loopTO); if(master) master.gain.setTargetAtTime(0, ctx.currentTime, .1); }
-  function toggleMute(mute){
-    if(!master) return;
-    master.gain.setTargetAtTime(mute ? 0 : .5, ctx.currentTime, .05);
+  function start(){ if(!initialized) return; if(ctx.state==='suspended') ctx.resume(); if(playing) return; playing = true; master.gain.value = .5; scheduleLoop(); }
+  function stop(){ playing = false; clearTimeout(loopTO); if(master && ctx) master.gain.setTargetAtTime(0, ctx.currentTime, .15); }
+  return { init, start, stop, get playing(){return playing;}, get ready(){return initialized;} };
+})();
+
+/* ---------- YOUTUBE PLAYER (Taaj — Lost Stories & Jai Dhir) ---------- */
+const TAAJ_ID = 'sg4-e1R9Juw';
+const YTPlayer = (function(){
+  let player=null, created=false, ready=false, needsTap=false, apiRequested=false;
+  let playingState=false, confirmed=false;
+
+  function loadAPI(cb){
+    if(window.YT && window.YT.Player){ cb(); return; }
+    window.onYouTubeIframeAPIReady = cb;
+    if(apiRequested) return;
+    apiRequested = true;
+    const t = document.createElement('script');
+    t.src = 'https://www.youtube.com/iframe_api';
+    document.head.appendChild(t);
   }
-  return { start, stop, toggleMute, get playing(){return playing;} };
+  function create(){ // MUST be called inside user gesture
+    loadAPI(function(){
+      if(created || !document.getElementById('ytPlayer')) return;
+      try{
+        player = new YT.Player('ytPlayer', {
+          videoId: TAAJ_ID,
+          playerVars: { autoplay:0, controls:0, playsinline:1, rel:0, modestbranding:1, iv_load_policy:3 },
+          events: {
+            onReady: function(){
+              ready = true;
+              // muted autoplay shuru — baad mein GO par unmute karenge
+              try{ player.setVolume(65); player.mute(); player.playVideo(); }catch(e){}
+            },
+            onStateChange: function(e){
+              const S = YT.PlayerState;
+              if(e.data === S.PLAYING){
+                playingState = true;
+                try{ if(!player.isMuted()){ onConfirmed(); } }catch(err){}
+              }
+              else if(e.data === S.PAUSED){ playingState = false; }
+              else if(e.data === S.ENDED){ try{ player.seekTo(0); player.playVideo(); }catch(e2){} }
+            },
+            onError: function(){ confirmed = false; playingState = false; }
+          }
+        });
+        created = true;
+      }catch(e){}
+    });
+  }
+  function onConfirmed(){
+    confirmed = true; needsTap = false;
+    const btn = $('#musicToggle');
+    if(btn){ btn.classList.remove('needsTap'); btn.textContent = '🔊'; }
+    MusicBox.stop(); // Taaj chal gaya — music box band
+  }
+  function unmuteAndPlay(){
+    if(!ready) return false;
+    try{
+      player.unMute(); player.setVolume(65); player.playVideo();
+      // desktop: unmute ke baad state event nahi aata — poll se confirm
+      let tries = 0;
+      const poll = setInterval(() => {
+        if(checkPlaying()){ clearInterval(poll); onConfirmed(); }
+        else if(++tries >= 6){ clearInterval(poll); }
+      }, 500);
+      return true;
+    }catch(e){ return false; }
+  }
+  // polling check — unmute ke baad state event nahi aata, isliye seedha check
+  function checkPlaying(){
+    if(!ready) return false;
+    try{ return playingState && !player.isMuted(); }catch(e){ return false; }
+  }
+  function pause(){ if(ready){ try{ player.pauseVideo(); }catch(e){} } }
+  function resume(){ if(ready){ try{ player.playVideo(); }catch(e){} } }
+  return {
+    create, unmuteAndPlay, pause, resume, checkPlaying,
+    get created(){ return created; }, get ready(){ return ready; },
+    get confirmed(){ return confirmed; }, get playing(){ return playingState; },
+    get needsTap(){ return needsTap; }, set needsTap(v){ needsTap = v; }
+  };
 })();
 
 /* ---------- MUSIC TOGGLE ---------- */
-let muted = false;
+let userMuted = false;
 $('#musicToggle').addEventListener('click', () => {
-  muted = !muted;
-  MusicBox.toggleMute(muted);
-  $('#musicToggle').textContent = muted ? '🔇' : '🔊';
+  const btn = $('#musicToggle');
+  // Agar YT pehle block tha (iOS) — ab user gesture mein try karo
+  if(YTPlayer.created && YTPlayer.ready && !YTPlayer.confirmed && !userMuted){
+    if(YTPlayer.unmuteAndPlay()){
+      MusicBox.stop();
+      return; // onConfirmed() icon sambhal lega
+    }
+  }
+  userMuted = !userMuted;
+  if(YTPlayer.confirmed){
+    userMuted ? YTPlayer.pause() : YTPlayer.resume();
+  } else if(MusicBox.ready){
+    userMuted ? MusicBox.stop() : MusicBox.start();
+  }
+  btn.classList.remove('needsTap');
+  btn.textContent = userMuted ? '🔇' : '🔊';
 });
 
-/* ---------- FLOW: NAME → COUNTDOWN → EXPERIENCE ---------- */
+/* ---------- FLOW: NAME → SUSPENSE → COUNTDOWN → EXPERIENCE ---------- */
 const nameInput = $('#nameInput'), startBtn = $('#startBtn');
-// prefill via ?name=
 const param = new URLSearchParams(location.search).get('name');
 if(param){ nameInput.value = param.slice(0,24); }
 
@@ -227,46 +282,61 @@ nameInput.addEventListener('keydown', e => { if(e.key === 'Enter') begin(); });
 function begin(){
   const name = sanitize(nameInput.value) || 'Dost';
   $('#bigName').textContent = name;
-  $('#finalName').textContent = `Happy Birthday, ${name}!`;
-  const count = $('#countdown'), num = $('#countNum'), go = $('#countGo');
+  $('#finalName').textContent = `Janam Din Mubarak, ${name}!`;
+  const count = $('#countdown'), suspense = $('#countSuspense'), num = $('#countNum'), go = $('#countGo');
+
+  // === USER GESTURE KE ANDAR (iOS unlock) ===
+  MusicBox.init();
+  YTPlayer.create();
+
   $('#nameScreen').classList.add('hide');
   count.classList.add('show');
+  suspense.classList.add('show');
 
-  let step = 3;
-  num.textContent = step;
-  num.classList.add('pop');
-  const iv = setInterval(() => {
-    step--;
-    if(step > 0){
-      num.classList.remove('pop'); void num.offsetWidth; // reflow restart
-      num.textContent = step; num.classList.add('pop');
-    } else {
-      clearInterval(iv);
-      num.style.display = 'none';
-      go.classList.add('show');
-      // === DHAMAKA ===
-      MusicBox.start();
-      launchExperience(name);
-      setTimeout(() => {
-        count.classList.remove('show');
-        $('#experience').removeAttribute('hidden');
-        window.scrollTo(0,0);
-        FX.cannons(150);
+  // Suspense → countdown → dhamaka
+  setTimeout(() => {
+    suspense.classList.remove('show');
+    num.textContent = '3'; num.classList.add('pop');
+    let step = 2;
+    const iv = setInterval(() => {
+      if(step > 0){
+        num.classList.remove('pop'); void num.offsetWidth;
+        num.textContent = step; num.classList.add('pop');
+        step--;
+      } else {
+        clearInterval(iv);
+        num.style.display = 'none';
+        go.classList.add('show');
+
+        // === DHAMAKA + TAAJ ===
         FX.burst(innerWidth/2, innerHeight*.35, 130, 13);
-        let shots = 0;
-        const fw = setInterval(() => {
-          FX.firework();
-          if(++shots >= 14) clearInterval(fw);
-        }, 420);
-        setTimeout(() => { revealInit(); window.__startAmbient(); }, 400);
-      }, 1500);
-    }
-  }, 1000);
-}
+        YTPlayer.unmuteAndPlay();  // Taaj start attempt
 
-function launchExperience(name){
-  // small confetti during countdown "go"
-  FX.burst(innerWidth/2, innerHeight/2, 60, 8);
+        // 3.2s baad — YT block hua to music box fallback + manual tap hint (iOS)
+        setTimeout(() => {
+          if(!YTPlayer.checkPlaying()){
+            if(!userMuted) MusicBox.start();
+            if(YTPlayer.created && YTPlayer.ready){
+              YTPlayer.needsTap = true;
+              const b = $('#musicToggle');
+              b.classList.add('needsTap');
+              b.textContent = '🎵';
+            }
+          }
+        }, 3200);
+
+        setTimeout(() => {
+          count.classList.remove('show');
+          $('#experience').removeAttribute('hidden');
+          window.scrollTo(0,0);
+          FX.cannons(150);
+          let shots = 0;
+          const fw = setInterval(() => { FX.firework(); if(++shots >= 14) clearInterval(fw); }, 420);
+          setTimeout(() => { revealInit(); window.__startAmbient(); }, 400);
+        }, 1600);
+      }
+    }, 1000);
+  }, 1900);
 }
 
 /* ---------- SCROLL REVEALS ---------- */
