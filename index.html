@@ -3,15 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0a0618">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<title>Happy Birthday! 🎂</title>
+<title>Janam Din Mubarak! 🎂</title>
 <meta name="description" content="Ek khoobsurat birthday surprise — naam likhein aur jaadu dekhein.">
-<meta property="og:title" content="Happy Birthday! 🎂">
-<meta property="og:description" content="Naam likhein aur surprise shuru karein ✨">
+<meta property="og:title" content="Janam Din Mubarak! 🎂">
+<meta property="og:description" content="Apna naam likhein aur surprise shuru karein ✨">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎂</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=1">
+<link rel="stylesheet" href="style.css?v=1789016641">
 </head>
 <body>
 
@@ -24,6 +25,9 @@
 <!-- Ambient balloons layer -->
 <div id="ambient" aria-hidden="true"></div>
 
+<!-- Hidden YouTube player (Taaj — Lost Stories & Jai Dhir) -->
+<div id="ytWrap" aria-hidden="true"><div id="ytPlayer"></div></div>
+
 <!-- Music toggle -->
 <button id="musicToggle" aria-label="Music on/off" title="Music on/off">🔊</button>
 
@@ -35,7 +39,7 @@
       <span class="ns__gift-emoji">🎁</span>
     </div>
     <h1 class="ns__title">Aap Kaa Naam?</h1>
-    <p class="ns__sub">Neeche apna naam likhein, phir jaadu shuru hoga ✨</p>
+    <p class="ns__sub">Bismillah karein, apna naam likhein —<br>ek khoobsurat surprise aapka intezar kar raha hai ✨</p>
     <div class="ns__form">
       <input id="nameInput" type="text" maxlength="24" placeholder="Apna pyara sa naam..." autocomplete="off" spellcheck="false">
       <button id="startBtn">
@@ -43,19 +47,20 @@
         <span class="ns__btn-sparkle">✨</span>
       </button>
     </div>
-    <p class="ns__hint">🔊 Sound on rakhein — gaana bajega 🎵</p>
+    <p class="ns__hint">🔊 Sound on rakhein — <em>Taaj</em> bajega 🎵</p>
   </div>
   <div class="ns__deco ns__deco--l1">🎈</div>
-  <div class="ns__deco ns__deco--l2">✨</div>
+  <div class="ns__deco ns__deco--l2">🌙</div>
   <div class="ns__deco ns__deco--l3">💖</div>
   <div class="ns__deco ns__deco--l4">🎉</div>
   <div class="ns__deco ns__deco--l5">🧿</div>
 </section>
 
-<!-- ============ COUNTDOWN OVERLAY ============ -->
+<!-- ============ SUSPENSE + COUNTDOWN OVERLAY ============ -->
 <div id="countdown" aria-hidden="true">
+  <div id="countSuspense">Kuch khaas hai aapke liye... 🤫</div>
   <div id="countNum">3</div>
-  <div id="countGo">Happy Birthday! 🎉</div>
+  <div id="countGo">Janam Din Mubarak! 🎉</div>
 </div>
 
 <!-- ============ EXPERIENCE ============ -->
@@ -64,24 +69,24 @@
   <!-- Scene 1: Big Reveal -->
   <section class="scene scene--intro">
     <div class="sticker st--1">🎈</div>
-    <div class="sticker st--2">🎉</div>
+    <div class="sticker st--2">🌙</div>
     <div class="sticker st--3">✨</div>
     <div class="sticker st--4">💖</div>
     <div class="sticker st--5">🧿</div>
     <div class="sticker st--6">🌸</div>
-    <p class="scr__eyebrow reveal">Aaj ka din sabse khaas hai</p>
-    <h2 class="scr__hb reveal">Happy Birthday</h2>
+    <p class="scr__eyebrow reveal">Aaj ka din sirf aapka hai</p>
+    <h2 class="scr__hb reveal">Janam Din Mubarak</h2>
     <h1 class="scr__name reveal" id="bigName">Dost</h1>
-    <p class="scr__wish reveal">Janam din mubarak ho! <br>Aap ke har din itne hi khoobsurat hon 🎂</p>
-    <div class="scr__scrollcue reveal"><span>Scroll karein</span><i>↓</i></div>
+    <p class="scr__wish reveal">Allah aapko hamesha muskuraye,<br>khushiyon se aapko de ghere 🌙🎂</p>
+    <div class="scr__scrollcue reveal"><span>Neeche scroll karein</span><i>↓</i></div>
   </section>
 
-  <!-- Scene 2: Cake & Wish -->
+  <!-- Scene 2: Cake & Dua -->
   <section class="scene scene--cake">
-    <p class="scr__eyebrow reveal">Ek secret wish maangin</p>
-    <h2 class="scr__head reveal">Wish Maango! 🎂</h2>
+    <p class="scr__eyebrow reveal">Aankhein band karein, dil se dua maangin</p>
+    <h2 class="scr__head reveal">Dua Maangin! 🎂</h2>
 
-    <div class="cake reveal" id="cake" role="button" tabindex="0" aria-label="Candles bujhaein">
+    <div class="cake reveal" id="cake" role="button" tabindex="0" aria-label="Shamaayein bujhaein">
       <div class="cake__candles">
         <div class="candle"><span class="flame"></span><span class="smoke"></span></div>
         <div class="candle"><span class="flame"></span><span class="smoke"></span></div>
@@ -95,45 +100,48 @@
       <div class="cake__plate"></div>
     </div>
 
-    <p class="cake__tip reveal" id="cakeTip">Cake pe tap karein — candles bujha dein 🕯️</p>
-    <h2 class="cake__done reveal" id="cakeDone" hidden>Wish Qabool Ho! 🧿</h2>
+    <p class="cake__tip reveal" id="cakeTip">Cake pe tap karein — shamaayein bujha dein 🕯️</p>
+    <h2 class="cake__done reveal" id="cakeDone" hidden>Dua Qabool Ho! 🤲</h2>
   </section>
 
-  <!-- Scene 3: Dil Wali Wishes -->
+  <!-- Scene 3: Dil Wali Duaayein -->
   <section class="scene scene--wishes">
     <p class="scr__eyebrow reveal">Dil se, aapke liye</p>
-    <h2 class="scr__head reveal">Kuch Baatein 💖</h2>
+    <h2 class="scr__head reveal">Kuch Duaayein 💖</h2>
 
     <div class="wish">
       <div class="wish__heart">❤️</div>
-      <p class="wish__text reveal">Khuda aapko itni khushi de, ke aapke seene mein jagah hi na bache 🌸</p>
+      <p class="wish__text reveal">Allah aapko itni khushi de,<br>ke aapki har dua qabool ho jaye 🤲</p>
     </div>
     <div class="wish">
       <div class="wish__heart">🧿</div>
-      <p class="wish__text reveal">Har dukh aapke palat ke chala jaye, aur har khushi aapke ghar ka pata le 🏠</p>
+      <p class="wish__text reveal">Buri nazar se Allah aapko hamesha bachaye —<br>aap pe sirf mohabbat ho</p>
+    </div>
+    <div class="wish">
+      <div class="wish__heart">🌙</div>
+      <p class="wish__text reveal">Har qadam pe Allah ka saath ho,<br>har manzil aasaan ho</p>
     </div>
     <div class="wish">
       <div class="wish__heart">✨</div>
-      <p class="wish__text reveal">Aap jaise log kam hote hain — jinke saath waqt ruk sa lagta hai ⏳</p>
-    </div>
-    <div class="wish">
-      <div class="wish__heart">🎈</div>
-      <p class="wish__text reveal">Har saal aap pe numaiya rehbari ho aur aapki zindagi chamakti rahe 🌟</p>
+      <p class="wish__text reveal">Aap jaise log bohat kam hote hain —<br>Allah ki rehmat ki nishani 💫</p>
     </div>
   </section>
 
   <!-- Scene 4: Finale -->
   <section class="scene scene--finale">
-    <p class="scr__eyebrow reveal">Aur ek aakhri baat</p>
-    <h2 class="fin__big reveal">Bohat Saara<br><em>Pyara Sa</em> Pyara 🎂</h2>
-    <h1 class="fin__name reveal" id="finalName">Happy Birthday, Dost!</h1>
-    <p class="fin__note reveal">Dekha? Aap ke liye poora aasman jal utha 🎆<br>Ab party shuru karein! 🎉</p>
+    <p class="scr__eyebrow reveal">Aur akhir mein, ek dil ki baat</p>
+    <h2 class="fin__big reveal">Aap Bohat<br><em>Khaas</em> Hain 💖</h2>
+    <h1 class="fin__name reveal" id="finalName">Janam Din Mubarak, Dost!</h1>
+    <p class="fin__note reveal">Dekha? Aap ke liye poora aasman jal utha 🎆<br>Ye poora page sirf aap ke liye banaya gaya hai —<br>hansi, khushi aur duaayein, sab aapke liye 🤍</p>
     <button class="btn__replay reveal" id="replayBtn">↻ Phir Se Dekhein</button>
   </section>
 
-  <footer class="bfoot">Made with 💖 — aapke liye</footer>
+  <footer class="bfoot">
+    <p>♪ Taaj — <em>Lost Stories & Jai Dhir</em></p>
+    <p>Banaya gaya 💖 sirf aapke liye</p>
+  </footer>
 </main>
 
-<script src="script.js?v=1"></script>
+<script src="script.js?v=1789016641"></script>
 </body>
 </html>
