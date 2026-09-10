@@ -249,9 +249,21 @@ em{font-style:italic}
   backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);transition:all .3s var(--ease)}
 .btn__replay:hover{border-color:var(--pink);transform:translateY(-3px);box-shadow:0 12px 40px rgba(236,72,153,.35)}
 
+/* WhatsApp button */
+.btn__wa{
+  display:inline-flex;align-items:center;gap:10px;margin-top:18px;padding:15px 34px;
+  font-size:16px;font-weight:600;font-family:var(--sans);color:#0b2e13;border-radius:100px;
+  background:linear-gradient(120deg,#3ddc6e,#25d366);box-shadow:0 10px 36px rgba(37,211,102,.35);
+  transition:transform .3s var(--ease),box-shadow .3s}
+.btn__wa:hover{transform:translateY(-3px);box-shadow:0 16px 44px rgba(37,211,102,.5)}
+.btn__wa:active{transform:translateY(0) scale(.97)}
+.btn__wa svg{flex-shrink:0}
+
 /* footer */
 .bfoot{position:relative;z-index:10;text-align:center;padding:30px 20px;color:rgba(253,247,255,.4);font-size:13px;line-height:2}
 .bfoot em{font-style:italic;color:rgba(253,247,255,.6)}
+.bfoot__by{margin-top:4px}
+.bfoot__by em{font-weight:600}
 
 /* ===== REVEAL ANIM ===== */
 .reveal{opacity:0;transform:translateY(44px);transition:opacity .9s var(--ease),transform .9s var(--ease)}
