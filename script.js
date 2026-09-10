@@ -1,8 +1,11 @@
-/* ===== JANAM DIN MUBARAK — script (Taaj + music box fallback) ===== */
+/* ===== JANAM DIN MUBARAK — script v3 (GSAP scroll cinema + Taaj instrumental) ===== */
 'use strict';
 const $ = s => document.querySelector(s);
 const $$ = s => document.querySelectorAll(s);
 const rand = (a,b)=>a+Math.random()*(b-a);
+
+let experienceShown = false;
+let gsapActive = false;
 
 /* ---------- STARS ---------- */
 (function stars(){
@@ -15,6 +18,14 @@ const rand = (a,b)=>a+Math.random()*(b-a);
   }
   box.innerHTML = html;
 })();
+
+/* ---------- SCROLL PROGRESS ---------- */
+addEventListener('scroll', () => {
+  const h = document.documentElement;
+  const p = h.scrollTop / (h.scrollHeight - h.clientHeight || 1);
+  const fill = $('#pfill');
+  if(fill) fill.style.width = (p*100)+'%';
+}, { passive: true });
 
 /* ---------- PARTICLE ENGINE (confetti + fireworks) ---------- */
 const FX = (function(){
@@ -110,6 +121,28 @@ const FX = (function(){
   };
 })();
 
+/* ---------- TAP HEARTS (jaadu har tap pe) ---------- */
+document.addEventListener('click', e => {
+  if(!experienceShown) return;
+  if(e.target.closest('button, a, input, .cake, #musicToggle')) return;
+  spawnTapHearts(e.clientX, e.clientY);
+});
+function spawnTapHearts(x, y){
+  const EMOJIS = ['💖','💖','💖','✨','🌙','🧿'];
+  const n = 2 + Math.floor(Math.random()*3);
+  for(let i=0;i<n;i++){
+    const h = document.createElement('span');
+    h.className = 'tap-heart';
+    h.textContent = EMOJIS[Math.floor(Math.random()*EMOJIS.length)];
+    h.style.left = (x + rand(-22,22))+'px';
+    h.style.top = (y + rand(-14,14))+'px';
+    h.style.fontSize = rand(14,26)+'px';
+    h.style.setProperty('--dur', rand(.9,1.6)+'s');
+    document.body.appendChild(h);
+    setTimeout(()=>h.remove(), 1700);
+  }
+}
+
 /* ---------- MUSIC BOX (Web Audio — guaranteed fallback) ---------- */
 const MusicBox = (function(){
   let ctx=null, master=null, delay=null, playing=false, loopTO=null, initialized=false;
@@ -170,8 +203,8 @@ const MusicBox = (function(){
   return { init, start, stop, get playing(){return playing;}, get ready(){return initialized;} };
 })();
 
-/* ---------- YOUTUBE PLAYER (Taaj — Lost Stories & Jai Dhir) ---------- */
-const TAAJ_ID = 'sg4-e1R9Juw';
+/* ---------- YOUTUBE PLAYER (Taaj Instrumental — Lost Stories) ---------- */
+const TAAJ_ID = 'h7r67MpcGAQ';
 const YTPlayer = (function(){
   let player=null, created=false, ready=false, needsTap=false, apiRequested=false;
   let playingState=false, confirmed=false;
@@ -195,7 +228,6 @@ const YTPlayer = (function(){
           events: {
             onReady: function(){
               ready = true;
-              // muted autoplay shuru — baad mein GO par unmute karenge
               try{ player.setVolume(65); player.mute(); player.playVideo(); }catch(e){}
             },
             onStateChange: function(e){
@@ -218,13 +250,12 @@ const YTPlayer = (function(){
     confirmed = true; needsTap = false;
     const btn = $('#musicToggle');
     if(btn){ btn.classList.remove('needsTap'); btn.textContent = '🔊'; }
-    MusicBox.stop(); // Taaj chal gaya — music box band
+    MusicBox.stop();
   }
   function unmuteAndPlay(){
     if(!ready) return false;
     try{
       player.unMute(); player.setVolume(65); player.playVideo();
-      // desktop: unmute ke baad state event nahi aata — poll se confirm
       let tries = 0;
       const poll = setInterval(() => {
         if(checkPlaying()){ clearInterval(poll); onConfirmed(); }
@@ -233,7 +264,6 @@ const YTPlayer = (function(){
       return true;
     }catch(e){ return false; }
   }
-  // polling check — unmute ke baad state event nahi aata, isliye seedha check
   function checkPlaying(){
     if(!ready) return false;
     try{ return playingState && !player.isMuted(); }catch(e){ return false; }
@@ -252,11 +282,10 @@ const YTPlayer = (function(){
 let userMuted = false;
 $('#musicToggle').addEventListener('click', () => {
   const btn = $('#musicToggle');
-  // Agar YT pehle block tha (iOS) — ab user gesture mein try karo
   if(YTPlayer.created && YTPlayer.ready && !YTPlayer.confirmed && !userMuted){
     if(YTPlayer.unmuteAndPlay()){
       MusicBox.stop();
-      return; // onConfirmed() icon sambhal lega
+      return;
     }
   }
   userMuted = !userMuted;
@@ -268,6 +297,111 @@ $('#musicToggle').addEventListener('click', () => {
   btn.classList.remove('needsTap');
   btn.textContent = userMuted ? '🔇' : '🔊';
 });
+
+/* ---------- GSAP SCROLL CINEMA ---------- */
+function setNameLetters(name){
+  const el = $('#bigName');
+  el.innerHTML = '';
+  [...name].forEach(ch => {
+    const m = document.createElement('span'); m.className = 'lmask';
+    const c = document.createElement('span'); c.className = 'lchar';
+    c.textContent = ch === ' ' ? '\u00A0' : ch;
+    m.appendChild(c); el.appendChild(m);
+  });
+}
+
+function buildScrollFX(){
+  if(!window.gsap || !window.ScrollTrigger){
+    revealFallback();
+    return false;
+  }
+  gsap.registerPlugin(ScrollTrigger);
+  gsapActive = true;
+
+  // .reveal class hatao — GSAP inline styles control karega
+  $$('.reveal').forEach(el => el.classList.remove('reveal'));
+
+  // initial states
+  gsap.set('.lline', { yPercent: 115 });
+  gsap.set('#bigName .lchar', { yPercent: 120, rotate: 6 });
+  gsap.set('[data-anim="fade"]', { opacity: 0, y: 40 });
+  gsap.set('[data-anim="left"]', { opacity: 0, x: -70, rotate: -2 });
+  gsap.set('[data-anim="right"]', { opacity: 0, x: 70, rotate: 2 });
+  gsap.set('[data-anim="pop"]', { opacity: 0, scale: .65, y: 20 });
+
+  // ===== INTRO — countdown ke baad khud chalta hai =====
+  window.__playIntro = () => {
+    const tl = gsap.timeline({ defaults: { ease: 'power4.out' } });
+    tl.to('.scene--intro .lline', { yPercent: 0, duration: .95, stagger: .12 })
+      .to('#bigName .lchar', { yPercent: 0, rotate: 0, duration: .7, stagger: .035, ease: 'back.out(1.7)' }, '-=.45')
+      .to('.scene--intro [data-anim="fade"]', { opacity: 1, y: 0, duration: .8, stagger: .15, ease: 'power3.out' }, '-=.4');
+  };
+
+  // ===== STORY — lines ek ek karke scroll pe =====
+  gsap.utils.toArray('.story__line').forEach((line, i) => {
+    gsap.to(line.querySelectorAll('.lline'), { yPercent: 0, duration: .9, ease: 'power4.out',
+      scrollTrigger: { trigger: line, start: 'top 80%', once: true } });
+    gsap.to(line, { opacity: 1, y: 0, duration: .8, delay: .15, ease: 'power3.out',
+      scrollTrigger: { trigger: line, start: 'top 80%', once: true } });
+  });
+
+  // ===== SCENE HEADS — masked reveals =====
+  $$('.scene').forEach(scene => {
+    if(scene.classList.contains('scene--intro') || scene.classList.contains('scene--story')) return;
+    const lines = scene.querySelectorAll('.scr__head .lline, .fin__big .lline, .fin__name .lline');
+    if(lines.length){
+      gsap.to(lines, { yPercent: 0, duration: .95, stagger: .14, ease: 'power4.out',
+        scrollTrigger: { trigger: scene, start: 'top 68%', once: true } });
+    }
+    const fades = scene.querySelectorAll('[data-anim="fade"]');
+    if(fades.length){
+      gsap.to(fades, { opacity: 1, y: 0, duration: .8, stagger: .16, ease: 'power3.out',
+        scrollTrigger: { trigger: scene, start: 'top 55%', once: true } });
+    }
+  });
+
+  // ===== WISHES — left/right se aate hain =====
+  gsap.utils.toArray('.wish').forEach(w => {
+    gsap.to(w, { opacity: 1, x: 0, rotate: 0, duration: .95, ease: 'power3.out',
+      scrollTrigger: { trigger: w, start: 'top 85%', once: true } });
+  });
+
+  // ===== CAKE — bounce =====
+  gsap.to('.cake', { opacity: 1, scale: 1, duration: 1.1, ease: 'back.out(1.5)',
+    scrollTrigger: { trigger: '.cake', start: 'top 82%', once: true } });
+
+  // ===== BUTTONS — pop =====
+  gsap.utils.toArray('[data-anim="pop"]').forEach(el => {
+    gsap.to(el, { opacity: 1, scale: 1, y: 0, duration: .7, ease: 'back.out(2)',
+      scrollTrigger: { trigger: el, start: 'top 92%', once: true } });
+  });
+
+  // ===== STICKERS — parallax =====
+  gsap.utils.toArray('.sticker').forEach((s, i) => {
+    gsap.to(s, { yPercent: i % 2 ? -60 : 60, ease: 'none',
+      scrollTrigger: { trigger: s.closest('.scene'), start: 'top bottom', end: 'bottom top', scrub: 1.2 } });
+  });
+
+  // ===== SCENE ENTRY — chhota confetti pop =====
+  $$('.scene').forEach(scene => {
+    if(scene.classList.contains('scene--intro')) return;
+    ScrollTrigger.create({
+      trigger: scene, start: 'top 62%', once: true,
+      onEnter: () => FX.burst(innerWidth/2, innerHeight*.38, 35, 7)
+    });
+  });
+
+  ScrollTrigger.refresh();
+  return true;
+}
+
+/* ---------- FALLBACK (no GSAP) ---------- */
+function revealFallback(){
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, { threshold: .25 });
+  $$('.reveal').forEach(el => io.observe(el));
+}
 
 /* ---------- FLOW: NAME → SUSPENSE → COUNTDOWN → EXPERIENCE ---------- */
 const nameInput = $('#nameInput'), startBtn = $('#startBtn');
@@ -281,8 +415,8 @@ nameInput.addEventListener('keydown', e => { if(e.key === 'Enter') begin(); });
 
 function begin(){
   const name = sanitize(nameInput.value) || 'Dost';
-  $('#bigName').textContent = name;
-  $('#finalName').textContent = `Janam Din Mubarak, ${name}!`;
+  setNameLetters(name);
+  $('#finalNameLine').textContent = `Janam Din Mubarak, ${name}!`;
   const count = $('#countdown'), suspense = $('#countSuspense'), num = $('#countNum'), go = $('#countGo');
 
   // === USER GESTURE KE ANDAR (iOS unlock) ===
@@ -308,9 +442,9 @@ function begin(){
         num.style.display = 'none';
         go.classList.add('show');
 
-        // === DHAMAKA + TAAJ ===
+        // === DHAMAKA + TAAJ (Instrumental) ===
         FX.burst(innerWidth/2, innerHeight*.35, 130, 13);
-        YTPlayer.unmuteAndPlay();  // Taaj start attempt
+        YTPlayer.unmuteAndPlay();
 
         // 3.2s baad — YT block hua to music box fallback + manual tap hint (iOS)
         setTimeout(() => {
@@ -328,23 +462,20 @@ function begin(){
         setTimeout(() => {
           count.classList.remove('show');
           $('#experience').removeAttribute('hidden');
+          experienceShown = true;
           window.scrollTo(0,0);
           FX.cannons(150);
           let shots = 0;
           const fw = setInterval(() => { FX.firework(); if(++shots >= 14) clearInterval(fw); }, 420);
-          setTimeout(() => { revealInit(); window.__startAmbient(); }, 400);
+          setTimeout(() => {
+            buildScrollFX();
+            window.__startAmbient();
+            if(gsapActive) setTimeout(() => window.__playIntro && window.__playIntro(), 250);
+          }, 300);
         }, 1600);
       }
     }, 1000);
   }, 1900);
-}
-
-/* ---------- SCROLL REVEALS ---------- */
-function revealInit(){
-  const io = new IntersectionObserver(entries => {
-    entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
-  }, { threshold: .25 });
-  $$('.reveal').forEach(el => io.observe(el));
 }
 
 /* ---------- CAKE ---------- */
@@ -354,8 +485,11 @@ function blowCandles(){
   if(blown) return; blown = true;
   $$('.candle').forEach((c,i) => setTimeout(() => c.classList.add('out'), i*130));
   $('#cakeTip').hidden = true;
+  if(gsapActive){
+    gsap.fromTo('#cakeDone', {opacity:0, y:30, scale:.9}, {opacity:1, y:0, scale:1, duration:.8, ease:'back.out(2)'});
+  }
   setTimeout(() => {
-    const done = $('#cakeDone'); done.hidden = false;
+    $('#cakeDone').hidden = false;
     FX.burst(innerWidth/2, innerHeight*.55, 120, 12);
     let shots = 0;
     const fw = setInterval(() => { FX.firework(); if(++shots >= 6) clearInterval(fw); }, 380);
@@ -370,7 +504,18 @@ $('#replayBtn').addEventListener('click', () => {
   $$('.candle').forEach(c => c.classList.remove('out'));
   $('#cakeDone').hidden = true;
   $('#cakeTip').hidden = false;
-  $$('.reveal').forEach(el => el.classList.remove('in'));
   window.scrollTo({ top: 0, behavior: 'auto' });
-  setTimeout(() => { revealInit(); FX.cannons(120); }, 100);
+  setTimeout(() => {
+    FX.cannons(120);
+    if(gsapActive){
+      // intro dobara chalao — naam letters wapas animate
+      gsap.set('#bigName .lchar', { yPercent: 120, rotate: 6 });
+      gsap.set('.scene--intro .lline', { yPercent: 115 });
+      gsap.set('.scene--intro [data-anim="fade"]', { opacity: 0, y: 40 });
+      window.__playIntro();
+    } else {
+      $$('.reveal').forEach(el => el.classList.remove('in'));
+      revealFallback();
+    }
+  }, 150);
 });
