@@ -12,9 +12,12 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎂</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=1789016875">
+<link rel="stylesheet" href="style.css?v=1789017186">
 </head>
 <body>
+
+<!-- Scroll progress -->
+<div class="pbar" aria-hidden="true"><div class="pbar__fill" id="pfill"></div></div>
 
 <!-- Star field -->
 <div id="stars" aria-hidden="true"></div>
@@ -25,7 +28,7 @@
 <!-- Ambient balloons layer -->
 <div id="ambient" aria-hidden="true"></div>
 
-<!-- Hidden YouTube player (Taaj — Lost Stories & Jai Dhir) -->
+<!-- Hidden YouTube player (Taaj Instrumental — Lost Stories) -->
 <div id="ytWrap" aria-hidden="true"><div id="ytPlayer"></div></div>
 
 <!-- Music toggle -->
@@ -74,19 +77,33 @@
     <div class="sticker st--4">💖</div>
     <div class="sticker st--5">🧿</div>
     <div class="sticker st--6">🌸</div>
-    <p class="scr__eyebrow reveal">Aaj ka din sirf aapka hai</p>
-    <h2 class="scr__hb reveal">Janam Din Mubarak</h2>
-    <h1 class="scr__name reveal" id="bigName">Dost</h1>
-    <p class="scr__wish reveal">Allah aapko hamesha muskuraye,<br>khushiyon se aapko de ghere 🌙🎂</p>
-    <div class="scr__scrollcue reveal"><span>Neeche scroll karein</span><i>↓</i></div>
+    <p class="scr__eyebrow reveal" data-anim="fade">Aaj ka din sirf aapka hai</p>
+    <h2 class="scr__hb">
+      <span class="lmask"><span class="lline">Janam Din</span></span>
+      <span class="lmask"><span class="lline">Mubarak</span></span>
+    </h2>
+    <h1 class="scr__name" id="bigName" aria-live="polite">Dost</h1>
+    <p class="scr__wish reveal" data-anim="fade">Allah aapko hamesha muskuraye,<br>khushiyon se aapko de ghere 🌙🎂</p>
+    <div class="scr__scrollcue reveal" data-anim="fade"><span>Neeche scroll karein</span><i>↓</i></div>
   </section>
 
-  <!-- Scene 2: Cake & Dua -->
-  <section class="scene scene--cake">
-    <p class="scr__eyebrow reveal">Aankhein band karein, dil se dua maangin</p>
-    <h2 class="scr__head reveal">Dua Maangin! 🎂</h2>
+  <!-- Scene 2: Chhoti Si Kahaani -->
+  <section class="scene scene--story">
+    <p class="scr__eyebrow reveal" data-anim="fade">Ek chhoti si kahaani</p>
+    <div class="story">
+      <p class="story__line reveal" data-anim="fade"><span class="lmask"><span class="lline">Ruko... ek dil ki baat hai,</span></span></p>
+      <p class="story__line reveal" data-anim="fade"><span class="lmask"><span class="lline">ek aisi roshni ki, jo har dil mein</span></span></p>
+      <p class="story__line reveal" data-anim="fade"><span class="lmask"><span class="lline">ghar kar jaati hai ✨</span></span></p>
+      <p class="story__line story__line--big reveal" data-anim="fade"><span class="lmask"><span class="lline">Wo roshni... aap hain 💖</span></span></p>
+    </div>
+  </section>
 
-    <div class="cake reveal" id="cake" role="button" tabindex="0" aria-label="Shamaayein bujhaein">
+  <!-- Scene 3: Cake & Dua -->
+  <section class="scene scene--cake">
+    <p class="scr__eyebrow reveal" data-anim="fade">Aankhein band karein, dil se dua maangin</p>
+    <h2 class="scr__head reveal" data-anim="fade"><span class="lmask"><span class="lline">Dua Maangin! 🎂</span></span></h2>
+
+    <div class="cake reveal" data-anim="pop" id="cake" role="button" tabindex="0" aria-label="Shamaayein bujhaein">
       <div class="cake__candles">
         <div class="candle"><span class="flame"></span><span class="smoke"></span></div>
         <div class="candle"><span class="flame"></span><span class="smoke"></span></div>
@@ -100,54 +117,65 @@
       <div class="cake__plate"></div>
     </div>
 
-    <p class="cake__tip reveal" id="cakeTip">Cake pe tap karein — shamaayein bujha dein 🕯️</p>
-    <h2 class="cake__done reveal" id="cakeDone" hidden>Dua Qabool Ho! 🤲</h2>
+    <p class="cake__tip reveal" data-anim="fade" id="cakeTip">Cake pe tap karein — shamaayein bujha dein 🕯️</p>
+    <h2 class="cake__done reveal" data-anim="fade" id="cakeDone" hidden>Dua Qabool Ho! 🤲</h2>
   </section>
 
-  <!-- Scene 3: Dil Wali Duaayein -->
+  <!-- Scene 4: Dil Wali Duaayein -->
   <section class="scene scene--wishes">
-    <p class="scr__eyebrow reveal">Dil se, aapke liye</p>
-    <h2 class="scr__head reveal">Kuch Duaayein 💖</h2>
+    <div class="float-hearts" aria-hidden="true">
+      <span class="fh fh--1">💖</span>
+      <span class="fh fh--2">✨</span>
+      <span class="fh fh--3">🌙</span>
+      <span class="fh fh--4">🧿</span>
+    </div>
+    <p class="scr__eyebrow reveal" data-anim="fade">Dil se, aapke liye</p>
+    <h2 class="scr__head reveal" data-anim="fade"><span class="lmask"><span class="lline">Kuch Duaayein 💖</span></span></h2>
 
-    <div class="wish">
+    <div class="wish reveal" data-anim="left">
       <div class="wish__heart">❤️</div>
-      <p class="wish__text reveal">Allah aapko itni khushi de,<br>ke aapki har dua qabool ho jaye 🤲</p>
+      <p class="wish__text">Allah aapko itni khushi de,<br>ke aapki har dua qabool ho jaye 🤲</p>
     </div>
-    <div class="wish">
+    <div class="wish reveal" data-anim="right">
       <div class="wish__heart">🧿</div>
-      <p class="wish__text reveal">Buri nazar se Allah aapko hamesha bachaye —<br>aap pe sirf mohabbat ho</p>
+      <p class="wish__text">Buri nazar se Allah aapko hamesha bachaye —<br>aap pe sirf mohabbat ho</p>
     </div>
-    <div class="wish">
+    <div class="wish reveal" data-anim="left">
       <div class="wish__heart">🌙</div>
-      <p class="wish__text reveal">Har qadam pe Allah ka saath ho,<br>har manzil aasaan ho</p>
+      <p class="wish__text">Har qadam pe Allah ka saath ho,<br>har manzil aasaan ho</p>
     </div>
-    <div class="wish">
+    <div class="wish reveal" data-anim="right">
       <div class="wish__heart">✨</div>
-      <p class="wish__text reveal">Aap jaise log bohat kam hote hain —<br>Allah ki rehmat ki nishani 💫</p>
+      <p class="wish__text">Aap jaise log bohat kam hote hain —<br>Allah ki rehmat ki nishani 💫</p>
     </div>
   </section>
 
-  <!-- Scene 4: Finale -->
+  <!-- Scene 5: Finale -->
   <section class="scene scene--finale">
-    <p class="scr__eyebrow reveal">Aur akhir mein, ek dil ki baat</p>
-    <h2 class="fin__big reveal">Aap Bohat<br><em>Khaas</em> Hain 💖</h2>
-    <h1 class="fin__name reveal" id="finalName">Janam Din Mubarak, Dost!</h1>
-    <p class="fin__note reveal">Dekha? Aap ke liye poora aasman jal utha 🎆<br>Ye poora page sirf aap ke liye banaya gaya hai —<br>hansi, khushi aur duaayein, sab aapke liye 🤍</p>
-    <button class="btn__replay reveal" id="replayBtn">↻ Phir Se Dekhein</button>
+    <p class="scr__eyebrow reveal" data-anim="fade">Aur akhir mein, ek dil ki baat</p>
+    <h2 class="fin__big reveal" data-anim="fade">
+      <span class="lmask"><span class="lline">Aap Bohat</span></span>
+      <span class="lmask"><span class="lline"><em>Khaas</em> Hain 💖</span></span>
+    </h2>
+    <h1 class="fin__name reveal" data-anim="fade"><span class="lmask"><span class="lline" id="finalNameLine">Janam Din Mubarak, Dost!</span></span></h1>
+    <p class="fin__note reveal" data-anim="fade">Dekha? Aap ke liye poora aasman jal utha 🎆<br>Ye poora page sirf aap ke liye banaya gaya hai —<br>hansi, khushi aur duaayein, sab aapke liye 🤍</p>
+    <button class="btn__replay reveal" data-anim="pop" id="replayBtn">↻ Phir Se Dekhein</button>
 
-    <a class="btn__wa reveal" href="https://wa.me/923063632210" target="_blank" rel="noopener" aria-label="WhatsApp par contact karein">
+    <a class="btn__wa reveal" data-anim="pop" href="https://wa.me/923063632210" target="_blank" rel="noopener" aria-label="WhatsApp par contact karein">
       <svg viewBox="0 0 32 32" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M16 3C9.4 3 4 8.4 4 15c0 2.6.8 5 2.3 7L4 29l7.2-2.3c1.9 1 4 1.5 6.3 1.5 6.6 0 12-5.4 12-12S22.6 3 16 3zm0 22c-2 0-3.9-.5-5.5-1.6l-.4-.2-4.3 1.4 1.4-4.2-.3-.4C5.8 18.3 5.3 16.7 5.3 15 5.3 9.1 10.1 4.3 16 4.3S26.7 9.1 26.7 15 21.9 25 16 25zm5.8-7.4c-.3-.2-1.8-.9-2.1-1-.3-.1-.5-.2-.7.2-.2.3-.8 1-.9 1.2-.2.2-.3.2-.6.1-.3-.2-1.3-.5-2.4-1.5-.9-.8-1.5-1.8-1.7-2.1-.2-.3 0-.5.1-.6l.5-.6c.2-.2.2-.3.3-.5.1-.2 0-.4 0-.6l-.9-2.1c-.2-.5-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4-.3.3-1.2 1.1-1.2 2.8s1.2 3.2 1.4 3.5c.2.2 2.4 3.6 5.7 5 3.3 1.4 3.3.9 3.9.9.6 0 2-.8 2.3-1.6.3-.8.3-1.5.2-1.6-.1-.2-.3-.2-.6-.4z"/></svg>
       <span>WhatsApp Par Baat Karein</span>
     </a>
   </section>
 
   <footer class="bfoot">
-    <p>♪ Taaj — <em>Lost Stories & Jai Dhir</em></p>
+    <p>♪ Taaj (Instrumental) — <em>Lost Stories</em></p>
     <p>Banaya gaya 💖 sirf aapke liye</p>
     <p class="bfoot__by">Made by <em>Hamas Ahmed</em></p>
   </footer>
 </main>
 
-<script src="script.js?v=1789016875"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="script.js?v=1789017186"></script>
 </body>
 </html>
