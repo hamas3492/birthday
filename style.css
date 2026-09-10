@@ -159,7 +159,7 @@ em{font-style:italic}
 /* ===== EXPERIENCE / SCENES ===== */
 #experience{position:relative;z-index:10}
 .scene{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  text-align:center;padding:90px 22px;position:relative}
+  text-align:center;padding:90px 22px;position:relative;overflow-x:clip}
 .scr__eyebrow{font-family:var(--sans);font-size:12px;letter-spacing:.35em;text-transform:uppercase;color:var(--cyan);
   margin-bottom:14px;opacity:.9}
 .scr__hb{font-family:var(--script);font-weight:700;font-size:clamp(52px,12vw,110px);line-height:1.05;
