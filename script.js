@@ -205,6 +205,7 @@ const MusicBox = (function(){
 
 /* ---------- YOUTUBE PLAYER (Taaj Instrumental — Lost Stories) ---------- */
 const TAAJ_ID = 'h7r67MpcGAQ';
+const TAAJ_START = 38; // seconds — beat drop / hook, skip the slow intro
 const YTPlayer = (function(){
   let player=null, created=false, ready=false, needsTap=false, apiRequested=false;
   let playingState=false, confirmed=false;
@@ -224,11 +225,11 @@ const YTPlayer = (function(){
       try{
         player = new YT.Player('ytPlayer', {
           videoId: TAAJ_ID,
-          playerVars: { autoplay:0, controls:0, playsinline:1, rel:0, modestbranding:1, iv_load_policy:3 },
+          playerVars: { autoplay:0, controls:0, playsinline:1, rel:0, modestbranding:1, iv_load_policy:3, start: TAAJ_START },
           events: {
             onReady: function(){
               ready = true;
-              try{ player.setVolume(65); player.mute(); player.playVideo(); }catch(e){}
+              try{ player.setVolume(65); player.mute(); player.seekTo(TAAJ_START, true); player.playVideo(); }catch(e){}
             },
             onStateChange: function(e){
               const S = YT.PlayerState;
@@ -237,7 +238,7 @@ const YTPlayer = (function(){
                 try{ if(!player.isMuted()){ onConfirmed(); } }catch(err){}
               }
               else if(e.data === S.PAUSED){ playingState = false; }
-              else if(e.data === S.ENDED){ try{ player.seekTo(0); player.playVideo(); }catch(e2){} }
+              else if(e.data === S.ENDED){ try{ player.seekTo(TAAJ_START, true); player.playVideo(); }catch(e2){} }
             },
             onError: function(){ confirmed = false; playingState = false; }
           }
@@ -255,7 +256,9 @@ const YTPlayer = (function(){
   function unmuteAndPlay(){
     if(!ready) return false;
     try{
-      player.unMute(); player.setVolume(65); player.playVideo();
+      player.unMute(); player.setVolume(65);
+      try{ if(player.getCurrentTime() < TAAJ_START - 1) player.seekTo(TAAJ_START, true); }catch(e0){}
+      player.playVideo();
       let tries = 0;
       const poll = setInterval(() => {
         if(checkPlaying()){ clearInterval(poll); onConfirmed(); }
@@ -425,11 +428,13 @@ function begin(){
 
   $('#nameScreen').classList.add('hide');
   count.classList.add('show');
+  count.classList.add('pulse');
   suspense.classList.add('show');
 
-  // Suspense → countdown → dhamaka
+  // Suspense (3 building lines, ~4.2s) → countdown → dhamaka
   setTimeout(() => {
     suspense.classList.remove('show');
+    count.classList.remove('pulse');
     num.textContent = '3'; num.classList.add('pop');
     let step = 2;
     const iv = setInterval(() => {
@@ -475,7 +480,7 @@ function begin(){
         }, 1600);
       }
     }, 1000);
-  }, 1900);
+  }, 4200);
 }
 
 /* ---------- CAKE ---------- */
